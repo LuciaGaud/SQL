@@ -2,6 +2,6 @@
 
 This will be an SQL funcion which return a table. 
 
-# Problem
+# Problem with TVP
 
-Part of the database I am working on is owned by the software company and I don't have direct access to it. I means that sometimes I must work blind like in this occasion.  
+TVP are not supported on the user repository of this particular server. I had to rewrite a new funcion to avoid TVP
