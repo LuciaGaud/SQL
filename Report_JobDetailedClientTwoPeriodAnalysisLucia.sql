@@ -1,4 +1,4 @@
-CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLucia
+CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLuciaV2
 (
 	@JH_GC UNIQUEIDENTIFIER
 	,@GC_RN_NK CHAR(2)
@@ -26,6 +26,7 @@ CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLucia
 	,@JS_Direction CHAR(3)
 	,@JK_RL_NKPortForConsolAgent CHAR(5)
     ,@MaxPercentage FLOAT
+	,@MinJobsPeriod1 INTEGER
 )
 RETURNS TABLE
 AS
@@ -95,11 +96,11 @@ CASE
                + ISNULL(AL_LineAmountOTHPeriod1, 0) + ISNULL(AL_ProfitAIRPeriod1, 0))
             AS FLOAT
         ) 
-        / CAST(
+        / ABS(CAST(
             (ISNULL(Al_LineAmountFCLPeriod1, 0) + ISNULL(AL_LineAmountLCLGRPPeriod1, 0) + ISNULL(AL_LineAmountLCLOTHPeriod1, 0) 
                + ISNULL(AL_LineAmountOTHPeriod1, 0) + ISNULL(AL_ProfitAIRPeriod1, 0))
             AS FLOAT
-        )
+        ))
     ELSE 
         NULL 
 END AS ActualPercentage
@@ -152,10 +153,18 @@ CAST(
                + ISNULL(AL_LineAmountOTHPeriod1, 0) + ISNULL(AL_ProfitAIRPeriod1, 0))
             AS FLOAT
         ) 
-        / CAST(
+        / ABS(CAST(
           (ISNULL(Al_LineAmountFCLPeriod1, 0) + ISNULL(AL_LineAmountLCLGRPPeriod1, 0) + ISNULL(AL_LineAmountLCLOTHPeriod1, 0) 
                + ISNULL(AL_LineAmountOTHPeriod1, 0) + ISNULL(AL_ProfitAIRPeriod1, 0))
             AS FLOAT
-        )
+        ))
         ELSE NULL 
-    END < CAST((@MaxPercentage / 100.0) * -1 AS FLOAT);
+    END < CAST((@MaxPercentage / 100.0) * -1 AS FLOAT)
+	AND 
+    (
+        CAST(
+            (ISNULL(JH_RecordCountAIRPeriod1, 0) + ISNULL(JH_RecordCountFCLPeriod1, 0) + ISNULL(JH_RecordCountLCLPeriod1, 0) 
+            + ISNULL(JH_RecordCountOTHPeriod1, 0))
+            AS INT
+        ) < @MinJobsPeriod1
+    );
