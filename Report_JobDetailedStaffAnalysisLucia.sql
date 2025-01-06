@@ -1,4 +1,4 @@
-CREATE FUNCTION Report_JobDetailedStaffAnalysis
+CREATE FUNCTION Report_JobDetailedStaffAnalysisLucia
 	(
 		@JH_GC UNIQUEIDENTIFIER,
 		@O8_Role CHAR(4),
@@ -20,7 +20,9 @@ CREATE FUNCTION Report_JobDetailedStaffAnalysis
 		@O8_GS_ResponsiblePersonList AS nvarchar(4000),
 		@O8_GS_GEList AS nvarchar(4000),
 		@JK_RL_NKPortForDirection AS CHAR(5), 
-		@JK_OH_AgentForDirection as UNIQUEIDENTIFIER
+		@JK_OH_AgentForDirection as UNIQUEIDENTIFIER,
+		@LocalClientCreatedFromDate as DATETIME, 
+		@LocalClientCreatedToDate as DATETIME
 	)
 RETURNS TABLE
 WITH SCHEMABINDING
@@ -31,6 +33,7 @@ SELECT
 	GS_FullName,
 	OH_Code, 
 	OH_FullName,
+	OH_SystemCreateTimeUtc,
 	JF_OH, 
 	O8_GS_ResponsiblePerson,
 	JH_RecordCountAIR, 
@@ -76,5 +79,9 @@ from
 		)
 		INNER JOIN dbo.OrgHeader  on csfn_JobDetailedAnalysisClientStaffSummary.JF_OH = OH_PK 
 		LEFT JOIN dbo.GLBStaff  on csfn_JobDetailedAnalysisClientStaffSummary.O8_GS_ResponsiblePerson = GS_PK 
-WHERE
-	(ISNULL(@O8_GS_GEList,'') = '' or charindex(CAST(GS_GE_HomeDepartment AS VARCHAR(36)), @O8_GS_GEList) > 0)
+WHERE 
+    (ISNULL(@O8_GS_GEList, '') = '' OR CHARINDEX(CAST(GS_GE_HomeDepartment AS VARCHAR(36)), @O8_GS_GEList) > 0)
+AND 
+    OH_SystemCreateTimeUtc > @LocalClientCreatedFromDate
+AND 
+    OH_SystemCreateTimeUtc < ISNULL(@LocalClientCreatedToDate, CAST(GETDATE() AS DATETIME))
