@@ -1,4 +1,4 @@
-CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLuciaV2
+CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLucia
 (
 	@JH_GC UNIQUEIDENTIFIER
 	,@GC_RN_NK CHAR(2)
@@ -166,5 +166,5 @@ CAST(
             (ISNULL(JH_RecordCountAIRPeriod1, 0) + ISNULL(JH_RecordCountFCLPeriod1, 0) + ISNULL(JH_RecordCountLCLPeriod1, 0) 
             + ISNULL(JH_RecordCountOTHPeriod1, 0))
             AS INT
-        ) < @MinJobsPeriod1
+        ) >= @MinJobsPeriod1
     );
