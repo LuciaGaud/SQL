@@ -1,4 +1,4 @@
-CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLucia
+CREATE FUNCTION Report_JobDetailedClientTwoPeriodAnalysisLuciaV2
 (
 	@JH_GC UNIQUEIDENTIFIER
 	,@GC_RN_NK CHAR(2)
@@ -34,6 +34,7 @@ RETURN
 SELECT
 	OrgHeaderClient.OH_Code as OH_CodeClient, 
 	OrgHeaderClient.OH_FullName as OH_FullNameClient,
+	O8_GS_NKPersonResponsible AS ClientSalesRep,
 	JS_OH_Client,
 	JH_RecordCountAIRPeriod1,
 	JS_ActualChargeableAIRPeriod1,  
@@ -137,7 +138,12 @@ FROM
 			,@JK_RL_NKPortForConsolAgent
 		)
 	INNER JOIN dbo.OrgHeader OrgHeaderClient  
-		ON csfn_JobDetailedAnalysisClientTwoPeriodSummary.JS_OH_Client = OrgHeaderClient.OH_PK
+    	ON csfn_JobDetailedAnalysisClientTwoPeriodSummary.JS_OH_Client = OrgHeaderClient.OH_PK 
+    	
+
+	LEFT JOIN OrgStaffAssignments 
+		ON OH_PK = OrgStaffAssignments.O8_OH
+		AND OrgStaffAssignments.O8_Role = 'SAL'
 
 -- Filter only rows where ActualPercentage < -MaxPercentage
 WHERE 
